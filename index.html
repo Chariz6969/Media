@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Makroskopik & Mikroskopik Tempoyak Pro - Eduforia 2026</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f0a1c;
+            --panel-bg: rgba(25, 18, 46, 0.9);
+            --border-glow: #bd93f9;
+            --neon-green: #50fa7b;
+            --neon-pink: #ff79c6;
+            --neon-cyan: #8be9fd;
+            --neon-yellow: #f1fa8c;
+            --text-main: #f8f8f2;
+            --text-dim: #6272a4;
+            --durian-raw: #f1e05a;
+            --durian-fermented: #d4a317;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, #1c1236 0%, #0f0a1c 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        header h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.25rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(139, 233, 253, 0.6);
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        header p {
+            font-size: 1.05rem;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        .highlight-text {
+            color: var(--neon-pink);
+            font-weight: 600;
+        }
+
+        /* Simulation Layout Container */
+        .simulation-container {
+            display: grid;
+            grid-template-columns: 1.35fr 0.65fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1250px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .simulation-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6),
+                        0 0 15px rgba(189, 147, 249, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        /* Combined Viewport */
+        .viewport-container {
+            position: relative;
+            height: 530px;
+            background: #06040a;
+            border-radius: 12px;
+            border: 2px solid rgba(189, 147, 249, 0.4);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 0.95fr 1.05fr;
+            padding: 15px;
+            gap: 15px;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            .viewport-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .viewport-title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.62rem;
+            color: var(--neon-yellow);
+            z-index: 10;
+            background: rgba(15, 10, 28, 0.85);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--neon-yellow);
+        }
+
+        /* --- MACROSCOPIC JAR VIEW --- */
+        .macro-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            border-right: 1px dashed rgba(189, 147, 249, 0.2);
+            padding-bottom: 20px;
+        }
+
+        .macro-label {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            color: var(--neon-pink);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 8px;
+            border: 2px solid var(--neon-pink);
+            border-radius: 0;
+            z-index: 10;
+        }
+
+        /* Glass Jar with Premium Pixel Art Style */
+        .glass-jar {
+            width: 160px;
+            height: 280px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            border: 4px solid rgba(255, 255, 255, 0.85);
+            border-bottom-width: 8px;
+            border-radius: 0;
+            box-shadow: 
+                8px 8px 0 rgba(0,0,0,0.6),
+                inset -8px -8px 0 rgba(0,0,0,0.4),
+                inset 8px 0 0 rgba(255,255,255,0.15);
+            transition: all 0.3s steps(10);
+        }
+
+        .jar-neck {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 20px;
+            border: 4px solid rgba(255, 255, 255, 0.85);
+            border-bottom: none;
+            background: rgba(255, 255, 255, 0.15);
+            z-index: 5;
+            box-shadow: inset -4px 0 0 rgba(0,0,0,0.3);
+        }
+
+        .jar-lid {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 126px;
+            height: 24px;
+            background: #ff5555;
+            border: 4px solid #ffffff;
+            z-index: 6;
+            transition: all 0.6s steps(8);
+            transform-origin: left bottom;
+            box-shadow: 
+                inset 0 4px 0 rgba(255,255,255,0.4),
+                inset 0 -4px 0 rgba(0,0,0,0.4),
+                inset -4px 0 0 rgba(0,0,0,0.4),
+                4px 4px 0 rgba(0,0,0,0.6);
+        }
+
+        .jar-lid.open {
+            transform: translateX(-50%) translateY(-28px) rotate(-38deg);
+        }
+
+        .jar-shine {
+            position: absolute;
+            top: 20px;
+            left: 12px;
+            width: 16px;
+            height: 75%;
+            background: rgba(255,255,255,0.7);
+            clip-path: polygon(
+                0 0, 100% 0, 100% 65%, 0 65%, 
+                0 70%, 100% 70%, 100% 80%, 0 80%,
+                0 85%, 100% 85%, 100% 100%, 0 100%
+            );
+            pointer-events: none;
+            z-index: 8;
+        }
+
+        /* Fibrous Pulp Texture - Pixel Art Dither */
+        .pulp-layer {
+            width: 100%;
+            height: 68%;
+            background-color: var(--durian-raw);
+            background-image: 
+                linear-gradient(45deg, rgba(0,0,0,0.08) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.08)),
+                linear-gradient(45deg, rgba(0,0,0,0.08) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.08));
+            background-size: 8px 8px;
+            background-position: 0 0, 4px 4px;
+            position: relative;
+            border-radius: 0;
+            transition: background-color 2.5s steps(10);
+            overflow: hidden;
+            box-shadow: inset 0 8px 0 rgba(0,0,0,0.15);
+        }
+
+        /* Dynamic Pulp Particles (Micro timeline representation in macro) */
+        .pulp-particle {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.9;
+            transition: all 0.5s steps(4);
+        }
+        .pulp-particle.bacteria {
+            width: 8px;
+            height: 8px;
+            background: #50fa7b;
+            border-radius: 0;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+        .pulp-particle.sugar {
+            width: 6px;
+            height: 6px;
+            background: #f1fa8c;
+            border-radius: 0;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.3);
+            z-index: 1;
+        }
+        .pulp-particle.acid {
+            width: 8px;
+            height: 8px;
+            background: #8be9fd;
+            border-radius: 0;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.3);
+            z-index: 3;
+        }
+
+        .ferment-bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.65);
+            width: 8px;
+            height: 8px;
+            border-radius: 0;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.25);
+            animation: rise-bubble 2s infinite steps(10);
+            pointer-events: none;
+        }
+
+        @keyframes rise-bubble {
+            0% { transform: translateY(180px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-20px); opacity: 0; }
+        }
+
+        .salt-drop {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.3);
+            border-radius: 0;
+            animation: fall-salt 1.2s infinite steps(8);
+            z-index: 4;
+        }
+
+        @keyframes fall-salt {
+            0% { transform: translateY(-50px); opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(220px); opacity: 0; }
+        }
+
+        /* --- MICROSCOPIC VIEW --- */
+        .micro-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .micro-label {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 8px;
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        /* Microscope Lens */
+        .microscope-lens {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 6px solid var(--border-glow);
+            box-shadow: 0 0 25px rgba(189, 147, 249, 0.4),
+                        inset 0 0 30px rgba(0,0,0,0.9);
+            position: relative;
+            overflow: hidden;
+            background: #050308;
+            margin-bottom: 10px;
+        }
+
+        #particle-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .lens-connector {
+            position: absolute;
+            top: 50%;
+            left: -40px;
+            width: 50px;
+            border-top: 3px dotted var(--border-glow);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .lens-shield {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 12;
+            transition: all 0.5s ease;
+        }
+
+        .lens-shield.active {
+            border: 4px solid var(--neon-cyan);
+            box-shadow: inset 0 0 20px rgba(139, 233, 253, 0.2);
+            animation: pulse-border 2s infinite ease-in-out;
+        }
+
+        /* Live Interative Legend */
+        .chamber-legend {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(189, 147, 249, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            font-size: 0.78rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* --- CONTROL PANEL --- */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--neon-pink);
+            border-bottom: 2px solid rgba(255, 121, 198, 0.2);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .control-val {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            color: var(--neon-yellow);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(98, 114, 164, 0.3);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--neon-cyan);
+            border: 2px solid var(--text-main);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(189, 147, 249, 0.2);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider-switch {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ff5555;
+            transition: .4s;
+            border-radius: 24px;
+            border: 1.5px solid var(--text-main);
+        }
+
+        .slider-switch:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 4px;
+            bottom: 3.5px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider-switch {
+            background-color: var(--neon-green);
+        }
+
+        input:checked + .slider-switch:before {
+            transform: translateX(24px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #6272a4 0%, #44475a 100%);
+            color: var(--text-main);
+            border: 1.5px solid var(--border-glow);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: var(--neon-cyan);
+        }
+
+        .btn-active {
+            background: linear-gradient(135deg, #bd93f9 0%, #8be9fd 100%) !important;
+            color: var(--bg-dark);
+            border-color: var(--text-main);
+            box-shadow: 0 0 15px rgba(139, 233, 253, 0.4);
+            font-weight: 800;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #ff79c6 0%, #bd93f9 100%);
+            border-color: var(--text-main);
+        }
+
+        /* --- DASHBOARD METRICS --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .dash-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1.5px solid rgba(189, 147, 249, 0.25);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 70px;
+        }
+
+        .dash-label {
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .dash-val {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: var(--neon-cyan);
+        }
+
+        
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>TEMP-SIMULATION: PROSES FERMENTASI</h1>
+    </header>
+
+    <div class="simulation-container">
+        <!-- Visualizer Panel -->
+        <div class="panel">
+            <h2 class="section-title">🧪 Chamber Reaksi Makro & Mikro</h2>
+            <div class="viewport-container" id="chamber">
+                <div class="viewport-title" id="mode-badge">STATUS: STOPLES TERBUKA (AEROB)</div>
+                
+                <!-- Macroscopic Glass Jar Area -->
+                <div class="macro-view" id="macro-area">
+                    <div class="macro-label">Tampilan Makroskopik</div>
+                    
+                    <div class="glass-jar" id="glass-jar-element">
+                        <div class="jar-neck"></div>
+                        <div class="jar-lid open" id="jar-lid-element"></div>
+                        <div class="jar-shine"></div>
+                        
+                        <div class="pulp-layer" id="pulp-layer-element">
+                            <!-- Bubbles injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Microscopic Microscope Lens Area -->
+                <div class="micro-view">
+                    <div class="micro-label">Lensa Mikroskopik</div>
+                    <div class="lens-connector"></div>
+                    
+                    <div class="microscope-lens">
+                        <div class="lens-shield" id="lens-shield-element"></div>
+                        <canvas id="particle-canvas"></canvas>
+                    </div>
+
+                    <!-- Live legend index dashboard -->
+                    <div class="chamber-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: #50fa7b; box-shadow: 0 0 5px #50fa7b;"></span>
+                            <span>🦠 BAL (Bakteri)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: #f1fa8c;"></span>
+                            <span>💎 Gula (Glukosa)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: #ff5555;"></span>
+                            <span>⚛️ O<sub>2</sub> (Oksigen)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: #8be9fd; box-shadow: 0 0 5px #8be9fd;"></span>
+                            <span>💧 Laktat (Asam)</span>
+                        </div>
+                        <div class="legend-item" style="grid-column: span 2;">
+                            <span class="legend-dot" style="background: rgba(139, 233, 253, 0.4);"></span>
+                            <span>🌊 H<sub>2</sub>O (Air Osmosis)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Live HUD text explanation -->
+            <div style="margin-top: 15px;" class="hud-explain" id="hud-text">
+                <strong>Panduan Awal:</strong> Stoples durian masih terbuka (Aerob). Oksigen bebas merusak antioksidan segar. Ayo masukkan <strong>garam</strong> untuk osmosis memeras kadar air selular, lalu <strong>kunci rapat stoples</strong> agar anaerob dan bakteri baik bisa mengubah durian menjadi Tempoyak!
+            </div>
+        </div>
+
+        <!-- Controls Panel -->
+        <div class="panel control-panel">
+            <div>
+                <h2 class="section-title">Konsol Pengendali</h2>
+                
+                <!-- Timeline Slider -->
+                <div class="control-group" style="margin-bottom: 15px;">
+                    <div class="control-label">
+                        <span>Laju Waktu Inkubasi</span>
+                        <span class="control-val" id="day-lbl">HARI 1</span>
+                    </div>
+                    <input type="range" id="day-slider" min="1" max="7" value="1">
+                </div>
+
+                <!-- Toggles -->
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                    <div class="toggle-container">
+                        <span>Segel & Tutup Rapat Stoples</span>
+                        <label class="switch">
+                            <input type="checkbox" id="seal-toggle">
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Langkah 2: Tambahkan Garam</span>
+                        <button class="btn" id="salt-btn">Kocok Garam (Off)</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-play" id="play-btn">▶ PUTAR SIMULASI OTOMATIS</button>
+            </div>
+
+            <!-- Stats Dashboard -->
+            <div>
+                <h2 class="section-title">📊 Sensor & Metrik Fisikokimia</h2>
+                <div class="dashboard-grid">
+                    <div class="dash-card">
+                        <span class="dash-label">pH Tingkat Keasaman</span>
+                        <span class="dash-val" id="val-ph">6.5 (Netral)</span>
+                    </div>
+                    <div class="dash-card">
+                        <span class="dash-label">Populasi BAL (Bakteri)</span>
+                        <span class="dash-val" id="val-bal">1.2 x 10²</span>
+                    </div>
+                    <div class="dash-card">
+                        <span class="dash-label">Kadar Asam Laktat</span>
+                        <span class="dash-val" id="val-lactic">0.0 %</span>
+                    </div>
+                    <div class="dash-card">
+                        <span class="dash-label">Kondisi Fisik Durian</span>
+                        <span class="dash-val" id="val-physical" style="color: var(--neon-yellow);">Buah Segar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Interactive Simulation Scripts -->
+    <script>
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        const sealToggle = document.getElementById('seal-toggle');
+        const saltBtn = document.getElementById('salt-btn');
+        const daySlider = document.getElementById('day-slider');
+        const dayLbl = document.getElementById('day-lbl');
+        
+        // Dynamic Macroscopic elements
+        const macroArea = document.getElementById('macro-area');
+        const jarLid = document.getElementById('jar-lid-element');
+        const pulpLayer = document.getElementById('pulp-layer-element');
+        const glassJar = document.getElementById('glass-jar-element');
+        const lensShield = document.getElementById('lens-shield-element');
+        
+        const modeBadge = document.getElementById('mode-badge');
+        const hudText = document.getElementById('hud-text');
+        const playBtn = document.getElementById('play-btn');
+
+        // Stats Labels
+        const valPh = document.getElementById('val-ph');
+        const valBal = document.getElementById('val-bal');
+        const valLactic = document.getElementById('val-lactic');
+        const valPhysical = document.getElementById('val-physical');
+
+        const size = 250;
+        canvas.width = size;
+        canvas.height = size;
+
+        // App States (Ideal Conditions Enabled by Default)
+        let isSealed = true; 
+        let saltAdded = true; 
+        let currentDay = 1;
+        let isPlaying = false;
+        let playInterval = null;
+
+        // Spark particles for chemical reaction visual effects
+        class Spark {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 3.5;
+                this.vy = (Math.random() - 0.5) * 3.5;
+                this.radius = 1 + Math.random() * 2.5;
+                this.alpha = 1.0;
+                this.decay = 0.02 + Math.random() * 0.03;
+                this.color = color || '#8be9fd';
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        const sparks = [];
+
+        // Detailed Particle Classes
+        class Particle {
+            constructor(type) {
+                this.type = type;
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * size;
+                this.y = Math.random() * size;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.radius = this.type === 'bacteria' ? 7 : (this.type === 'sugar' ? 5 : 4);
+                this.angle = Math.random() * Math.PI * 2;
+                this.blinkTimer = Math.random() * 100;
+                
+                // Health/Energy dynamics for bacteria
+                this.energy = 100;
+                this.isWeak = false;
+                this.hurtCooldown = 0;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.blinkTimer++;
+
+                if (this.hurtCooldown > 0) {
+                    this.hurtCooldown--;
+                    if (this.hurtCooldown === 0) {
+                        this.isWeak = false;
+                    }
+                }
+
+                const cx = size / 2;
+                const cy = size / 2;
+                const distToCenter = Math.hypot(this.x - cx, this.y - cy);
+                const maxRadius = (size / 2) - 10;
+
+                if (distToCenter > maxRadius) {
+                    const angle = Math.atan2(this.y - cy, this.x - cx);
+                    this.x = cx + Math.cos(angle) * maxRadius;
+                    this.y = cy + Math.sin(angle) * maxRadius;
+                    
+                    const normalX = Math.cos(angle);
+                    const normalY = Math.sin(angle);
+                    const dotProduct = this.vx * normalX + this.vy * normalY;
+                    this.vx = this.vx - 2 * dotProduct * normalX;
+                    this.vy = this.vy - 2 * dotProduct * normalY;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                
+                const drawLabel = (text, color) => {
+                    ctx.fillStyle = color;
+                    ctx.font = "bold 7px Outfit, sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.fillText(text, this.x, this.y - this.radius - 3);
+                };
+
+                if (this.type === 'oxygen') {
+                    ctx.strokeStyle = '#ff5555';
+                    ctx.fillStyle = '#ff5555';
+                    ctx.beginPath();
+                    for(let i=0; i<8; i++) {
+                        let r = i % 2 === 0 ? this.radius * 1.2 : this.radius/2;
+                        let x = this.x + Math.cos(this.angle + i * Math.PI/4) * r;
+                        let y = this.y + Math.sin(this.angle + i * Math.PI/4) * r;
+                        if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Angry Eyes
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(this.x - 2, this.y - 2, 1.2, 1.2);
+                    ctx.fillRect(this.x + 1, this.y - 2, 1.2, 1.2);
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - 3, this.y - 3); ctx.lineTo(this.x, this.y - 1);
+                    ctx.moveTo(this.x + 3, this.y - 3); ctx.lineTo(this.x, this.y - 1);
+                    ctx.stroke();
+
+                    drawLabel("O2", "#ff5555");
+
+                } else if (this.type === 'sugar') {
+                    // Shiny Glucose Crystal
+                    ctx.fillStyle = '#f1fa8c';
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y - this.radius);
+                    ctx.lineTo(this.x + this.radius, this.y);
+                    ctx.lineTo(this.x, this.y + this.radius);
+                    ctx.lineTo(this.x - this.radius, this.y);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Small gloss
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(this.x - 1, this.y - 2, 1.5, 1.5);
+
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(this.x - 1.5, this.y + 0.5, 1, 1);
+                    ctx.fillRect(this.x + 0.5, this.y + 0.5, 1, 1);
+
+                    drawLabel("Gula", "#f1fa8c");
+
+                } else if (this.type === 'bacteria') {
+                    // Green cell - dim green if weak/aerob damaged
+                    ctx.fillStyle = this.isWeak ? '#3c9a56' : '#50fa7b';
+                    ctx.shadowBlur = this.isWeak ? 2 : 7;
+                    ctx.shadowColor = '#50fa7b';
+                    ctx.beginPath();
+                    ctx.ellipse(this.x, this.y, this.radius * 1.5, this.radius * 0.7, this.angle, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // Eyes and expression based on state
+                    ctx.fillStyle = '#000000';
+                    if (this.isWeak) {
+                        // Sad hurt eyes (\ /)
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x - 3.5, this.y - 2); ctx.lineTo(this.x - 1.5, this.y - 1);
+                        ctx.moveTo(this.x + 3.5, this.y - 2); ctx.lineTo(this.x + 1.5, this.y - 1);
+                        ctx.stroke();
+                        
+                        // Sad frown arc
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y + 2.5, 1.5, Math.PI, 0);
+                        ctx.stroke();
+                    } else {
+                        // Blinking/Healthy eyes and smile arc
+                        const isBlinking = (Math.floor(this.blinkTimer / 30) % 5 === 0);
+                        if (!isBlinking) {
+                            ctx.fillRect(this.x - 3, this.y - 1.5, 1.2, 1.2);
+                            ctx.fillRect(this.x + 1, this.y - 1.5, 1.2, 1.2);
+                        } else {
+                            ctx.strokeStyle = '#000000';
+                            ctx.lineWidth = 0.8;
+                            ctx.beginPath();
+                            ctx.moveTo(this.x - 4, this.y - 1); ctx.lineTo(this.x - 2, this.y - 1);
+                            ctx.moveTo(this.x, this.y - 1); ctx.lineTo(this.x + 2, this.y - 1);
+                            ctx.stroke();
+                        }
+                        // Happy mouth
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.arc(this.x - 0.5, this.y, 1.5, 0, Math.PI);
+                        ctx.stroke();
+                    }
+
+                    drawLabel(this.isWeak ? "BAL (Lemah)" : "BAL", this.isWeak ? "#888888" : "#50fa7b");
+
+                } else if (this.type === 'lactic_acid') {
+                    ctx.fillStyle = '#8be9fd';
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = '#8be9fd';
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y - this.radius * 1.3);
+                    ctx.quadraticCurveTo(this.x + this.radius, this.y, this.x, this.y + this.radius);
+                    ctx.quadraticCurveTo(this.x - this.radius, this.y, this.x, this.y - this.radius * 1.3);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    drawLabel("Laktat", "#8be9fd");
+
+                } else if (this.type === 'water') {
+                    ctx.fillStyle = '#8be9fd';
+                    ctx.globalAlpha = 0.45;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius - 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    
+                    drawLabel("H2O", "rgba(139, 233, 253, 0.6)");
+                }
+                ctx.restore();
+            }
+        }
+
+        const particles = [];
+        function initParticles() {
+            particles.length = 0;
+            for(let i=0; i<8; i++) particles.push(new Particle('sugar'));
+            for(let i=0; i<2; i++) particles.push(new Particle('bacteria'));
+            for(let i=0; i<6; i++) particles.push(new Particle('oxygen'));
+        }
+
+        function handleOsmosisEvent() {
+            for(let i=0; i<8; i++) {
+                const p = new Particle('water');
+                particles.push(p);
+            }
+        }
+
+        // Elastic Collision Solver & Reaction Handler
+        function handleCollisions() {
+            const toRemove = new Set();
+            const toAdd = [];
+
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p1 = particles[i];
+                    const p2 = particles[j];
+
+                    if (toRemove.has(p1) || toRemove.has(p2)) continue;
+
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const dist = Math.hypot(dx, dy);
+                    const minDist = p1.radius + p2.radius;
+
+                    if (dist < minDist) {
+                        let shouldBounce = true;
+
+                        // Reaction: Bacteria eats Sugar to make Lactic Acid!
+                        if ((p1.type === 'bacteria' && p2.type === 'sugar') || (p2.type === 'bacteria' && p1.type === 'sugar')) {
+                            const bac = p1.type === 'bacteria' ? p1 : p2;
+                            const sug = p1.type === 'sugar' ? p1 : p2;
+
+                            if (isSealed && saltAdded) {
+                                toRemove.add(sug);
+                                shouldBounce = false;
+
+                                // 6 cyan spark bursts for energetic reaction
+                                for (let k = 0; k < 6; k++) {
+                                    sparks.push(new Spark(sug.x, sug.y, '#8be9fd'));
+                                }
+
+                                // Spawn new Lactic Acid particle
+                                const lac = new Particle('lactic_acid');
+                                lac.x = sug.x;
+                                lac.y = sug.y;
+                                lac.vx = (Math.random() - 0.5) * 1.8;
+                                lac.vy = (Math.random() - 0.5) * 1.8;
+                                toAdd.push(lac);
+
+                                updateDashboard(currentDay);
+                            }
+                        }
+
+                        // Aerob oxidation damage: Oxygen damages Lactic Acid Bacteria!
+                        if ((p1.type === 'bacteria' && p2.type === 'oxygen') || (p2.type === 'bacteria' && p1.type === 'oxygen')) {
+                            const bac = p1.type === 'bacteria' ? p1 : p2;
+                            const oxy = p1.type === 'oxygen' ? p1 : p2;
+
+                            if (!isSealed) {
+                                if (bac.hurtCooldown <= 0) {
+                                    bac.energy -= 35;
+                                    bac.isWeak = true;
+                                    bac.hurtCooldown = 40; // invincible/hurt animation time
+
+                                    // Spasm of red angry sparks
+                                    for (let k = 0; k < 4; k++) {
+                                        sparks.push(new Spark(bac.x, bac.y, '#ff5555'));
+                                    }
+
+                                    if (bac.energy <= 0) {
+                                        toRemove.add(bac);
+                                        // Death burst
+                                        for (let k = 0; k < 10; k++) {
+                                            sparks.push(new Spark(bac.x, bac.y, '#6272a4'));
+                                        }
+                                        updateDashboard(currentDay);
+                                    }
+                                }
+                            } else {
+                                // Under anaerobic seal, BAL and Antioksidan neutralize leftover Oxygen!
+                                toRemove.add(oxy);
+                                shouldBounce = false;
+                                for (let k = 0; k < 4; k++) {
+                                    sparks.push(new Spark(oxy.x, oxy.y, '#50fa7b'));
+                                }
+                            }
+                        }
+
+                        if (shouldBounce) {
+                            // Perfect Elastic Bouncing
+                            const overlap = minDist - dist;
+                            const nx = dx / dist;
+                            const ny = dy / dist;
+
+                            // Displace to resolve overlap
+                            p1.x -= nx * overlap * 0.5;
+                            p1.y -= ny * overlap * 0.5;
+                            p2.x += nx * overlap * 0.5;
+                            p2.y += ny * overlap * 0.5;
+
+                            // Normal velocities
+                            const kx = p1.vx - p2.vx;
+                            const ky = p1.vy - p2.vy;
+                            const impulse = 2 * (nx * kx + ny * ky) / 2;
+
+                            p1.vx -= impulse * nx;
+                            p1.vy -= impulse * ny;
+                            p2.vx += impulse * nx;
+                            p2.vy += impulse * ny;
+                        }
+                    }
+                }
+            }
+
+            // Clean up deleted particles and append new ones
+            const filtered = particles.filter(p => !toRemove.has(p));
+            particles.length = 0;
+            particles.push(...filtered, ...toAdd);
+        }
+
+        function updateChamberState() {
+            let bCount = 0;
+            let sCount = 0;
+            let oCount = 0;
+            let lCount = 0;
+
+            particles.forEach(p => {
+                if (p.type === 'bacteria') bCount++;
+                if (p.type === 'sugar') sCount++;
+                if (p.type === 'oxygen') oCount++;
+                if (p.type === 'lactic_acid') lCount++;
+            });
+
+            if (isSealed && saltAdded) {
+                // Growth targets depending on day
+                const targetBacteria = Math.min(10, currentDay * 1.5 + 2);
+                const targetSugar = Math.max(1, 10 - currentDay);
+                
+                if (bCount < targetBacteria && Math.random() < 0.04) {
+                    particles.push(new Particle('bacteria'));
+                }
+                
+                if (sCount < targetSugar && Math.random() < 0.02) {
+                    particles.push(new Particle('sugar'));
+                }
+
+                // Oxygen naturally gets consumed
+                particles.forEach((p, idx) => {
+                    if (p.type === 'oxygen' && Math.random() < 0.06) {
+                        particles.splice(idx, 1);
+                    }
+                });
+            } else if (!isSealed) {
+                // Unsealed = full aerobic oxidation
+                if (oCount < 8 && Math.random() < 0.08) {
+                    particles.push(new Particle('oxygen'));
+                }
+                if (bCount > 1 && Math.random() < 0.01) {
+                    const idx = particles.findIndex(p => p.type === 'bacteria');
+                    if (idx !== -1) particles.splice(idx, 1);
+                }
+            }
+        }
+
+        // Realistic JS physics gravity salt bounce
+        function triggerSaltFallingAnimation() {
+            const numGrains = 40;
+            
+            // Layout references relative to parent container
+            const jarLeft = glassJar.offsetLeft;
+            const jarWidth = glassJar.offsetWidth;
+            const jarTop = glassJar.offsetTop;
+            const jarHeight = glassJar.offsetHeight;
+            
+            // Pulp level surface relative to macro-area (approx 32% inside the glass jar)
+            const pulpSurfaceY = jarTop + (jarHeight * 0.32);
+
+            for (let i = 0; i < numGrains; i++) {
+                const salt = document.createElement('div');
+                salt.className = 'salt-drop';
+                
+                // Disable CSS linear falling
+                salt.style.animation = 'none';
+                salt.style.opacity = '1';
+                
+                const startX = jarLeft + 15 + Math.random() * (jarWidth - 30);
+                const startY = jarTop - 40 - Math.random() * 50;
+                
+                salt.style.left = `${startX}px`;
+                salt.style.top = `${startY}px`;
+                macroArea.appendChild(salt);
+
+                let x = startX;
+                let y = startY;
+                let vy = 2 + Math.random() * 4;
+                let vx = (Math.random() - 0.5) * 1.5;
+                const gravity = 0.22;
+                const bounce = -0.3 - Math.random() * 0.25;
+                let bounceCount = 0;
+                
+                function updateSaltPhysics() {
+                    y += vy;
+                    x += vx;
+                    vy += gravity;
+
+                    // Side wall bounds
+                    if (x < jarLeft + 8) {
+                        x = jarLeft + 8;
+                        vx = -vx * 0.5;
+                    }
+                    if (x > jarLeft + jarWidth - 14) {
+                        x = jarLeft + jarWidth - 14;
+                        vx = -vx * 0.5;
+                    }
+
+                    // Collision with pulp layer surface
+                    if (y >= pulpSurfaceY) {
+                        y = pulpSurfaceY;
+                        vy = vy * bounce;
+                        vx = vx * 0.5; // friction
+                        bounceCount++;
+                        
+                        // Squish stretch bounce effect
+                        salt.style.transform = `scaleX(1.4) scaleY(0.7)`;
+                        setTimeout(() => {
+                            salt.style.transform = 'none';
+                        }, 80);
+                    }
+
+                    salt.style.left = `${x}px`;
+                    salt.style.top = `${y}px`;
+
+                    if (bounceCount < 3 && y <= pulpSurfaceY + 5) {
+                        requestAnimationFrame(updateSaltPhysics);
+                    } else {
+                        // Slowly dissolve/melt into durian pulp
+                        salt.style.transition = 'all 0.4s ease-out';
+                        salt.style.opacity = '0';
+                        salt.style.transform = 'scale(0.5)';
+                        setTimeout(() => { salt.remove(); }, 400);
+                    }
+                }
+
+                // Stagger falling start
+                setTimeout(() => {
+                    requestAnimationFrame(updateSaltPhysics);
+                }, Math.random() * 1000);
+            }
+        }
+
+        // Bubbling
+        let bubbleInterval = null;
+        function startMacroBubbles() {
+            if (bubbleInterval) clearInterval(bubbleInterval);
+            bubbleInterval = setInterval(() => {
+                if (isSealed && saltAdded && currentDay > 1) {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'ferment-bubble';
+                    const size = 3 + Math.random() * 8;
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    bubble.style.left = `${10 + Math.random() * 140}px`;
+                    pulpLayer.appendChild(bubble);
+                    
+                    setTimeout(() => { bubble.remove(); }, 2000);
+                }
+            }, 150);
+        }
+
+        function updateMacroPulp(day) {
+            const pulpParticles = pulpLayer.querySelectorAll('.pulp-particle');
+            pulpParticles.forEach(p => p.remove());
+
+            const w = pulpLayer.offsetWidth || 150;
+            const h = pulpLayer.offsetHeight || 180;
+
+            const createPulpParticle = (type) => {
+                const el = document.createElement('div');
+                el.className = `pulp-particle ${type}`;
+                el.style.left = `${5 + Math.random() * (w - 15)}px`;
+                el.style.top = `${5 + Math.random() * (h - 15)}px`;
+                if (type === 'bacteria') {
+                    el.style.transform = `rotate(${Math.random() * 360}deg)`;
+                }
+                pulpLayer.appendChild(el);
+            };
+
+            if (!isSealed || !saltAdded) {
+                for (let i = 0; i < 20; i++) {
+                    createPulpParticle('sugar');
+                }
+                return;
+            }
+
+            const sugarCount = Math.max(1, 20 - (day - 1) * 3);
+            const bacteriaCount = Math.min(32, (day - 1) * 5 + 3);
+            const acidCount = (day - 1) * 3;
+
+            for (let i = 0; i < sugarCount; i++) createPulpParticle('sugar');
+            for (let i = 0; i < bacteriaCount; i++) createPulpParticle('bacteria');
+            for (let i = 0; i < acidCount; i++) createPulpParticle('acid');
+        }
+
+        function updatePulpColor(day) {
+            updateMacroPulp(day);
+            if (!isSealed || !saltAdded) {
+                pulpLayer.style.backgroundColor = 'var(--durian-raw)';
+                glassJar.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+                return;
+            }
+            
+            const ratio = (day - 1) / 6;
+            pulpLayer.style.backgroundColor = interpolateColor('#f1e05a', '#d4a317', ratio);
+            glassJar.style.boxShadow = `0 10px 30px rgba(212, 163, 23, ${0.1 + ratio * 0.3})`;
+        }
+
+        function interpolateColor(color1, color2, factor) {
+            const r1 = parseInt(color1.substring(1, 3), 16);
+            const g1 = parseInt(color1.substring(3, 5), 16);
+            const b1 = parseInt(color1.substring(5, 7), 16);
+
+            const r2 = parseInt(color2.substring(1, 3), 16);
+            const g2 = parseInt(color2.substring(3, 5), 16);
+            const b2 = parseInt(color2.substring(5, 7), 16);
+
+            const r = Math.round(r1 + factor * (r2 - r1));
+            const g = Math.round(g1 + factor * (g2 - g1));
+            const b = Math.round(b1 + factor * (b2 - b1));
+
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Main Loop
+        function animate() {
+
+            ctx.clearRect(0, 0, size, size);
+            
+            // Grid background
+            ctx.strokeStyle = 'rgba(189, 147, 249, 0.05)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i=20; i<size; i+=20) {
+                ctx.moveTo(i, 0); ctx.lineTo(i, size);
+                ctx.moveTo(0, i); ctx.lineTo(size, i);
+            }
+            ctx.stroke();
+
+            updateChamberState();
+            handleCollisions();
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Update & Render chemical sparks
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                const s = sparks[i];
+                s.update();
+                s.draw();
+                if (s.alpha <= 0) {
+                    sparks.splice(i, 1);
+                }
+            }
+
+            updateDashboard(currentDay);
+            requestAnimationFrame(animate);
+        }
+
+        // Dashboard & HUD Live-bound Updates from actual particles
+        function updateDashboard(day) {
+            if (!isSealed || !saltAdded) {
+                valPh.textContent = "6.5 (Netral)";
+                valPh.style.color = "var(--text-main)";
+                valBal.textContent = "1.2 x 10²";
+                valBal.style.color = "var(--text-main)";
+                valLactic.textContent = "0.0 %";
+                valLactic.style.color = "var(--text-main)";
+                valPhysical.textContent = "Buah Segar";
+                valPhysical.style.color = "var(--neon-yellow)";
+                return;
+            }
+
+            // Dynamic binding: Count particles currently present in visualizer
+            let bCount = 0;
+            let lCount = 0;
+            particles.forEach(p => {
+                if (p.type === 'bacteria') bCount++;
+                if (p.type === 'lactic_acid') lCount++;
+            });
+
+            // Formulas linking particle counts directly to macro chemical parameters
+            const ph = Math.max(3.8, parseFloat((6.5 - lCount * 0.25).toFixed(1)));
+            const exponent = Math.min(9, 2 + bCount);
+            const bal = (1.2 * Math.pow(10, exponent)).toExponential(1);
+            const lactic = Math.min(2.5, parseFloat((lCount * 0.25).toFixed(1)));
+
+            valPh.textContent = `${ph.toFixed(1)} (Asam)`;
+            valPh.style.color = ph < 4.5 ? "var(--neon-green)" : "var(--neon-yellow)";
+            valBal.textContent = `${bal}`;
+            valBal.style.color = "var(--neon-green)";
+            valLactic.textContent = `${lactic.toFixed(1)} %`;
+            valLactic.style.color = "var(--neon-cyan)";
+            
+            if (ph > 5.5) {
+                valPhysical.textContent = "Awal Fermentasi";
+                valPhysical.style.color = "var(--neon-yellow)";
+            } else if (ph <= 5.5 && ph > 4.5) {
+                valPhysical.textContent = "Adonan Berbuih";
+                valPhysical.style.color = "var(--neon-cyan)";
+            } else {
+                valPhysical.textContent = "Tempoyak Matang";
+                valPhysical.style.color = "var(--neon-green)";
+            }
+        }
+
+        // Action Handlers
+        sealToggle.addEventListener('change', (e) => {
+            isSealed = e.target.checked;
+            if (isSealed) {
+                jarLid.classList.remove('open');
+                lensShield.classList.add('active');
+                daySlider.removeAttribute('disabled');
+                modeBadge.textContent = "STATUS: STOPLES TERSEGEL (ANAEROB)";
+                modeBadge.style.borderColor = "var(--neon-green)";
+                modeBadge.style.color = "var(--neon-green)";
+                
+                if (saltAdded) {
+                    updateTextHUD(currentDay);
+                    updateDashboard(currentDay);
+                } else {
+                    hudText.innerHTML = `<strong>Kondisi Stoples Disegel!</strong> Oksigen (O<sub>2</sub>) berhasil diblokir. Namun, bakteri baik belum aktif karena adonan belum diasinkan untuk osmosis. Ayo tuangkan garam sekarang!`;
+                }
+            } else {
+                jarLid.classList.add('open');
+                lensShield.classList.remove('active');
+                daySlider.setAttribute('disabled', 'true');
+                daySlider.value = 1;
+                currentDay = 1;
+                dayLbl.textContent = `HARI 1`;
+                modeBadge.textContent = "STATUS: STOPLES TERBUKA (OKSIDASI)";
+                modeBadge.style.borderColor = "var(--neon-yellow)";
+                modeBadge.style.color = "var(--neon-yellow)";
+                
+                // Reset particles to raw state
+                initParticles();
+                updatePulpColor(1);
+                updateDashboard(1);
+                updateTextHUD(1);
+            }
+        });
+
+        saltBtn.addEventListener('click', () => {
+            saltAdded = !saltAdded;
+            if (saltAdded) {
+                saltBtn.textContent = "Kocok Garam (ON)";
+                saltBtn.classList.add('btn-active');
+                triggerSaltFallingAnimation();
+                handleOsmosisEvent();
+                
+                if (isSealed) {
+                    updateTextHUD(currentDay);
+                    updateDashboard(currentDay);
+                    updatePulpColor(currentDay);
+                } else {
+                    hudText.innerHTML = `<strong>Garam Dihamburkan!</strong> Terjadi penarikan air selular (<strong>Osmosis</strong>). Tapi stoples belum disegel rapat! Oksigen bebas masuk merusak khasiat buah. Tutup stoples segera!`;
+                }
+            } else {
+                saltBtn.textContent = "Kocok Garam (Off)";
+                saltBtn.classList.remove('btn-active');
+                initParticles();
+                updatePulpColor(1);
+                updateDashboard(currentDay);
+                updateTextHUD(currentDay);
+            }
+        });
+
+        daySlider.addEventListener('input', (e) => {
+            // Dragging manually will pause the auto-play loop if active
+            if (isPlaying) {
+                clearInterval(playInterval);
+                isPlaying = false;
+                playBtn.classList.remove('btn-active');
+                playBtn.textContent = "▶ PUTAR SIMULASI OTOMATIS";
+            }
+            currentDay = parseInt(e.target.value);
+            dayLbl.textContent = `HARI ${currentDay}`;
+            updateDashboard(currentDay);
+            updateTextHUD(currentDay);
+            updatePulpColor(currentDay);
+        });
+
+        function updateTextHUD(day) {
+            if (!isSealed) {
+                hudText.innerHTML = `<strong>Panduan Awal:</strong> Stoples durian masih terbuka (Aerob). Oksigen bebas merusak antioksidan segar. Ayo masukkan <strong>garam</strong> untuk osmosis memeras kadar air selular, lalu <strong>kunci rapat stoples</strong> agar anaerob dan bakteri baik bisa mengubah durian menjadi Tempoyak!`;
+                return;
+            }
+            if (!saltAdded) {
+                hudText.innerHTML = `<strong>Stoples Tersegel!</strong> Oksigen (O<sub>2</sub>) berhasil diblokir. Namun, bakteri baik belum aktif karena adonan belum diasinkan untuk osmosis. Ayo tuangkan garam sekarang!`;
+                return;
+            }
+
+            const descriptions = [
+                `<strong>HARI 1: Awal Inkubasi</strong><br>Garam memicu <strong>Osmosis</strong>, air (H<sub>2</sub>O) ditarik keluar sel membentuk media cair. Bakteri Asam Laktat alami bawaan durian mulai beradaptasi di lingkungan stoples anaerob (tanpa oksigen).`,
+                `<strong>HARI 2: Oksigen Lenyap & Aktivitas BAL</strong><br>Gas oksigen di dalam stoples habis dikonsumsi. BAL mulai giat mendominasi. pH adonan turun ke 6.0 seiring terbentuknya sisa metabolit asam awal.`,
+                `<strong>HARI 3: Fase Eksponensial (Toples Mulai Berbuih)</strong><br>Tampak gelembung fermentasi gas CO<sub>2</sub> halus di stoples! Bakteri baik membelah diri secara masif, melahap gula durian dan melimpahkan senyawa <strong>Asam Laktat</strong> pengawet alami.`,
+                `<strong>HARI 4: Proteksi Asam Kuat</strong><br>Kadar asam laktat menyentuh 1.2% dengan pH turun ke 5.1. Tingkat keasaman ini membunuh bakteri merugikan (patogen pembusuk) sehingga tempoyak aman dan awet.`,
+                `<strong>HARI 5: Transformasi Cita Rasa & Aroma</strong><br>Senyawa gas belerang alami yang menyengat dinetralkan secara struktural, menghasilkan aroma wangi asam-gurih yang legit khas Palembang. Warna durian mulai matang keemasan.`,
+                `<strong>HARI 6: Fase Keseimbangan Biokimia</strong><br>Tingkat asam laktat stabil di 2.0% dengan pH sangat asam (4.2). Kondisi super asam ini secara alami mengerem metabolisme berlebih BAL agar tempoyak tidak terlalu asam.`,
+                `<strong>HARI 7: Tempoyak Matang Sempurna! (Juara Lomba)</strong><br>Warna toples keemasan tua berkilau, buih fermentasi matang stabil, pH 3.8. Seluruh kadar gizi, protein terurai, rasa asam-gurih legit, dan kekuatan perlindungan antioksidan mencapai titik puncak maksimal!`
+            ];
+
+            hudText.innerHTML = descriptions[day - 1];
+        }
+
+        // Play / Pause Simulation Handler
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                // PAUSE ACTION
+                clearInterval(playInterval);
+                isPlaying = false;
+                playBtn.classList.remove('btn-active');
+                playBtn.textContent = "▶ PUTAR SIMULASI OTOMATIS";
+                updateTextHUD(currentDay);
+            } else {
+                // PLAY ACTION
+                isPlaying = true;
+                playBtn.classList.add('btn-active');
+                playBtn.textContent = "⏸ PAUSE SIMULASI";
+                
+                // If we are already at day 7, loop back to day 1 when playing
+                if (currentDay >= 7) {
+                    currentDay = 1;
+                    daySlider.value = 1;
+                    dayLbl.textContent = "HARI 1";
+                    updatePulpColor(1);
+                    updateDashboard(1);
+                    updateTextHUD(1);
+                }
+                
+                playInterval = setInterval(() => {
+                    currentDay++;
+                    if (currentDay > 7) {
+                        clearInterval(playInterval);
+                        isPlaying = false;
+                        playBtn.classList.remove('btn-active');
+                        playBtn.textContent = "▶ PUTAR SIMULASI OTOMATIS";
+                        currentDay = 7;
+                    } else {
+                        daySlider.value = currentDay;
+                        dayLbl.textContent = `HARI ${currentDay}`;
+                        updateDashboard(currentDay);
+                        updateTextHUD(currentDay);
+                        updatePulpColor(currentDay);
+                    }
+                }, 2500);
+            }
+        });
+
+
+        // Init dengan Kondisi Ideal
+        sealToggle.checked = true;
+        jarLid.classList.remove('open');
+        lensShield.classList.add('active');
+        daySlider.removeAttribute('disabled');
+        saltBtn.textContent = "Kocok Garam (ON)";
+        saltBtn.classList.add('btn-active');
+        
+        modeBadge.textContent = "STATUS: STOPLES TERSEGEL (ANAEROB - KONDISI IDEAL)";
+        modeBadge.style.borderColor = "var(--neon-green)";
+        modeBadge.style.color = "var(--neon-green)";
+
+        // Tambahkan air osmosis di awal
+        initParticles();
+        handleOsmosisEvent();
+        
+        animate();
+        startMacroBubbles();
+        updatePulpColor(1);
+        updateDashboard(1);
+        updateTextHUD(1);
+    </script>
+</body>
+</html>
